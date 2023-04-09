@@ -1,47 +1,85 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="app-container">
+    <el-container>
+      <!-- 导航栏 -->
+      <el-header class="header">
+        <el-menu mode="horizontal">
+          <el-menu-item index="1">审核</el-menu-item>
+          <el-menu-item index="2">地址管理</el-menu-item>
+          <el-menu-item index="3">用户信息管理</el-menu-item>
+          <el-submenu index="4">
+            <template slot="title">
+              <span>{{ userInfo }}</span>
+            </template>
+            <el-menu-item index="4-1" @click="logout">退出登录</el-menu-item>
+          </el-submenu>
+        </el-menu>
+      </el-header>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
 
-  <main>
-    <TheWelcome />
-  </main>
+      <el-container>
+        <!-- 菜单栏 -->
+        <el-aside width="200px">
+          <el-menu
+              :default-active="activeMenu"
+              class="menu"
+              @select="handleMenuSelect"
+              :collapse="isCollapse"
+              :collapse-transition="false"
+              router
+          >
+            <el-submenu index="sub1">
+              <template slot="title">
+                <i class="el-icon-location"></i>
+                <span>地址管理</span>
+              </template>
+              <el-menu-item index="/address/list">地址列表</el-menu-item>
+              <el-menu-item index="/address/add">添加地址</el-menu-item>
+            </el-submenu>
+            <el-submenu index="sub2">
+              <template slot="title">
+                <i class="el-icon-menu"></i>
+                <span>菜单一</span>
+              </template>
+              <el-menu-item index="/menu1/page1">页面一</el-menu-item>
+              <el-menu-item index="/menu1/page2">页面二</el-menu-item>
+            </el-submenu>
+          </el-menu>
+        </el-aside>
+
+        <!-- 主体内容区域 -->
+        <el-main>
+          <!--          <router-view></router-view>-->
+        </el-main>
+      </el-container>
+    </el-container>
+  </div>
 </template>
 
+<script>
+
+export default {
+  name: "App"
+};
+</script>
+
 <style scoped>
-header {
-  line-height: 1.5;
+.app-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  margin: 0;
+  flex-direction: column;
+  padding-left: 0;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.header {
+  display: flex;
+  justify-content: space-between;
 }
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.flex-grow {
+  flex-grow: 1;
+}
+.menu {
+  height: 100%;
 }
 </style>

@@ -1,9 +1,10 @@
-const route = [{
-    path: '/HelloWorld',
-    component: () => import('@/components/HelloWorld.vue')
-},
+const route = [
     {
-        path:'/',
+        path: '/HelloWorld',
+        component: () => import('@/components/HelloWorld.vue')
+    },
+    {
+        path: '/',
         component: () => import('@/components/HelloWorld.vue')
     }
 ]
