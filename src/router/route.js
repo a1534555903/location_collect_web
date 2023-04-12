@@ -1,12 +1,8 @@
 import * as VueRouter from 'vue-router'
 const route = [
     {
-        path: '/HelloWorld',
-        component: () => import('@/components/HelloWorld.vue')
-    },
-    {
         path: '/',
-        component: () => import('@/components/HelloWorld.vue')
+        component: () => import('@/components/login/loginPage.vue')
     }
 ]
 const router = VueRouter.createRouter({
