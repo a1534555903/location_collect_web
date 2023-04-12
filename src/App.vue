@@ -3,53 +3,31 @@
     <el-container>
       <!-- 导航栏 -->
       <el-header class="header">
-        <el-menu mode="horizontal">
-          <el-menu-item index="1">审核</el-menu-item>
-          <el-menu-item index="2">地址管理</el-menu-item>
-          <el-menu-item index="3">用户信息管理</el-menu-item>
-          <el-submenu index="4">
-            <template slot="title">
-              <span>{{ userInfo }}</span>
-            </template>
-            <el-menu-item index="4-1" @click="logout">退出登录</el-menu-item>
-          </el-submenu>
+        <el-menu class="el-menu-demo" mode="horizontal">
+          <el-menu-item index="1">Element Plus</el-menu-item>
+          <el-sub-menu index="2">
+            <template #title>Workspace</template>
+            <el-menu-item index="2-1">item one</el-menu-item>
+            <el-menu-item index="2-2">item two</el-menu-item>
+            <el-menu-item index="2-3">item three</el-menu-item>
+            <el-sub-menu index="2-4">
+              <template #title>item four</template>
+              <el-menu-item index="2-4-1">item one</el-menu-item>
+              <el-menu-item index="2-4-2">item two</el-menu-item>
+              <el-menu-item index="2-4-3">item three</el-menu-item>
+            </el-sub-menu>
+          </el-sub-menu>
+          <el-menu-item index="3" disabled>Info</el-menu-item>
+          <el-menu-item index="4">Orders</el-menu-item>
         </el-menu>
       </el-header>
 
 
       <el-container>
-        <!-- 菜单栏 -->
-        <el-aside width="200px">
-          <el-menu
-              :default-active="activeMenu"
-              class="menu"
-              @select="handleMenuSelect"
-              :collapse="isCollapse"
-              :collapse-transition="false"
-              router
-          >
-            <el-submenu index="sub1">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>地址管理</span>
-              </template>
-              <el-menu-item index="/address/list">地址列表</el-menu-item>
-              <el-menu-item index="/address/add">添加地址</el-menu-item>
-            </el-submenu>
-            <el-submenu index="sub2">
-              <template slot="title">
-                <i class="el-icon-menu"></i>
-                <span>菜单一</span>
-              </template>
-              <el-menu-item index="/menu1/page1">页面一</el-menu-item>
-              <el-menu-item index="/menu1/page2">页面二</el-menu-item>
-            </el-submenu>
-          </el-menu>
-        </el-aside>
 
         <!-- 主体内容区域 -->
         <el-main>
-          <!--          <router-view></router-view>-->
+                    <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -57,9 +35,8 @@
 </template>
 
 <script>
-
 export default {
-  name: "App"
+  name: "App",
 };
 </script>
 
@@ -70,11 +47,6 @@ export default {
   display: flex;
   margin: 0;
   flex-direction: column;
-  padding-left: 0;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
 }
 .flex-grow {
   flex-grow: 1;

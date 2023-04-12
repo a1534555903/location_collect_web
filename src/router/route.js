@@ -1,3 +1,4 @@
+import * as VueRouter from 'vue-router'
 const route = [
     {
         path: '/HelloWorld',

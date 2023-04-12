@@ -1,6 +1,5 @@
 import { createApp } from 'vue'
 import App from "@/App.vue";
-import '@/assets/main.css'
 import vuex from "@/vuex";
 import router from "@/router/route";
 import ElementPlus from 'element-plus';
