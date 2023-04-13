@@ -11,7 +11,7 @@
         </el-aside>
         <!-- 主体内容区域 -->
         <el-main>
-                    <router-view></router-view>
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -21,6 +21,7 @@
 <script>
 import myAsider from "@/components/common/myAsider.vue";
 import myHeader from "@/components/common/myHeader.vue";
+
 export default {
   name: "App",
   components: {
@@ -38,9 +39,11 @@ export default {
   margin: 0;
   flex-direction: column;
 }
+
 .flex-grow {
   flex-grow: 1;
 }
+
 .menu {
   height: 100%;
 }

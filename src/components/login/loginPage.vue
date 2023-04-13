@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <el-form ref="form" :model="loginForm" label-width="80px">
+    <el-form ref="form" :model="loginForm" label-width="80px" :rules="rules">
       <el-form-item label="用户名" prop="username">
         <el-input v-model="loginForm.username"></el-input>
       </el-form-item>
@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import {ElMessageBox} from "element-plus";
+
 export default {
   name: 'Login',
   data() {
@@ -25,10 +27,10 @@ export default {
       },
       rules: {
         username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+          {required: true, message: '请输入用户名', trigger: 'blur'}
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' }
+          {required: true, message: '请输入密码', trigger: 'blur'}
         ]
       }
     };
@@ -37,17 +39,47 @@ export default {
     // 提交表单
     submitForm() {
       this.$refs.form.validate((valid) => {
-        if (valid) {
-          // 登录成功后的操作
-          console.log('登录成功');
-        } else {
-          console.log('表单验证失败');
-          return false;
-        }
-      });
+            if (valid) {
+              //axios发送Get请求到url
+              this.$axios.get(this.$store.state.url + '/web/admin/login',
+                  {
+                    params: {
+                      username: this.loginForm.username,
+                      password: this.loginForm.password
+                    }
+                  })
+                  .then((res) => {
+                    // console.log(res);
+                    // console.log(res.data);
+                    if (res.data === 'success') {
+                      // 用vue route 跳转到主页
+                      this.$router.push('/index');
+                    } else {
+                      ElMessageBox.alert('用户名或密码错误', '提示', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                          this.$refs.form.clearValidate();
+                        }
+                      });
+                      return false;
+                    }
+                  });
+            } else {
+              ElMessageBox.alert('请检查输入的内容', '提示', {
+                confirmButtonText: '确定',
+                callback: action => {
+                  this.$refs.form.clearValidate();
+                }
+              });
+              return false;
+            }
+          }
+      )
+      ;
     }
   }
-};
+}
+;
 </script>
 
 <style scoped>
