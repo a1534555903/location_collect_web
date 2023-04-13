@@ -11,7 +11,7 @@
         </el-aside>
         <!-- 主体内容区域 -->
         <el-main>
-          <router-view></router-view>
+          <router-view style="height: 100%; width: 100%;"></router-view>
         </el-main>
       </el-container>
     </el-container>

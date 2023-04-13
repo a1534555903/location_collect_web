@@ -29,16 +29,11 @@ const router = VueRouter.createRouter({
 router.beforeEach((to, from, next) => {
     const loggedIn = Cookies.get('user')
     if (to.path === '/' && !loggedIn) {
-        next('/login')
+        next('/login/loginPage')
     } else if (to.path === '/' && loggedIn) {
         next('/index')
-    } else {
-        next()
     }
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-    console.log(requiresAuth)
-
-    console.log(loggedIn)
     if (requiresAuth && !loggedIn) {
         next('/login/loginPage')
     } else {

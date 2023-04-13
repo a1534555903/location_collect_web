@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="username===null">
+    <div v-if="username===undefined">
       <el-text size="large">尚未登录</el-text>
     </div>
     <div v-else>
@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import Cookies from 'js-cookie';
 export default {
   name: "login",
   computed: {
@@ -20,8 +21,9 @@ export default {
   },
   methods: {
     logout() {
-      this.$store.commit('setUsername', null);
-      this.$router.push('/');
+      Cookies.remove('user', { path: '/' ,domain: 'localhost'});
+      this.$store.commit('setUsername', undefined);
+      this.$router.push('/login/loginPage');
     }
   }
 }
