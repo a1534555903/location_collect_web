@@ -53,6 +53,7 @@ export default {
                     // console.log(res.data);
                     if (res.data === 'success') {
                       // 用vue route 跳转到主页
+                      this.$store.commit('setUsername', this.loginForm.username);
                       this.$router.push('/index');
                     } else {
                       ElMessageBox.alert('用户名或密码错误', '提示', {
