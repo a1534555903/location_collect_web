@@ -19,7 +19,8 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+
+import Cookies from "js-cookie";
 
 export default {
   data() {
@@ -31,38 +32,46 @@ export default {
       },
       rules: {
         oldPassword: [
-          { required: true, message: '请输入原密码', trigger: 'blur' },
+          {required: true, message: '请输入原密码', trigger: 'blur'},
         ],
         newPassword: [
-          { required: true, message: '请输入新密码', trigger: 'blur' },
-          { min: 6, message: '密码长度不能少于6位', trigger: 'blur' },
+          {required: true, message: '请输入新密码', trigger: 'blur'},
+          {min: 6, message: '密码长度不能少于6位', trigger: 'blur'},
         ],
         confirmNewPassword: [
-          { required: true, message: '请确认新密码', trigger: 'blur' },
-          { validator: this.checkPassword, trigger: 'blur' },
+          {required: true, message: '请确认新密码', trigger: 'blur'},
+          {validator: this.checkPassword, trigger: 'blur'},
         ],
       },
     };
   },
   computed: {
-    ...mapState(['user']),
+    user() {
+      return this.$store.state.username;
+    }
   },
   methods: {
     handleSubmit() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          const { oldPassword, newPassword } = this.form;
-          this.$axios.post('/resetPassword', { oldPassword, newPassword })
-              .then(res => {
-                if (res.data.code === 200) {
-                  this.$message.success('密码重置成功');
-                } else {
-                  this.$message.error(res.data.msg || '密码重置失败');
-                }
-              })
-              .catch(error => {
-                this.$message.error(error.message || '密码重置失败');
-              });
+          const {oldPassword, newPassword} = this.form;
+          const username = this.user;
+          this.$axios.post(this.$store.state.url + '/web/admin/reset', {
+            username,
+            oldPassword,
+            newPassword,
+          }).then(res => {
+            if (res.data === "success") {
+              this.$message.success('密码重置成功');
+              Cookies.remove('user', {path: '/', domain: 'localhost'});
+              this.$store.commit('setUsername', undefined);
+              this.$router.push('/login/loginPage');
+            } else {
+              this.$message.error(res.data.msg || '密码重置失败,请检查你的密码是否正确');
+            }
+          }).catch(error => {
+            this.$message.error(error.message || '密码重置失败');
+          });
         }
       });
     },
