@@ -3,8 +3,8 @@
     <el-menu-item index="/index">首页</el-menu-item>
     <el-sub-menu index="/review">
       <template #title>审核</template>
-      <el-menu-item index="/review/address">兴趣点审核</el-menu-item>
-      <el-menu-item index="/review/standard">标准地址审核</el-menu-item>
+      <el-menu-item index="/review/poi">兴趣点审核</el-menu-item>
+      <el-menu-item index="/review/address">标准地址审核</el-menu-item>
     </el-sub-menu>
     <el-sub-menu index="/management">
       <template #title>管理</template>

@@ -1,9 +1,14 @@
 <template>
   <div>
-    <el-table :data="tableData" style="width: 100%">
-      <el-table-column label="Column 1" prop="column1"></el-table-column>
-      <el-table-column label="Column 2" prop="column2"></el-table-column>
-      <el-table-column label="操作" width="180">
+    <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55"/>
+      <el-table-column label="路" prop="road"></el-table-column>
+      <el-table-column label="号" prop="door"></el-table-column>
+      <el-table-column label="街道" prop="streetCode"></el-table-column>
+      <el-table-column label="经度" prop="longitude"></el-table-column>
+      <el-table-column label="纬度" prop="latitude"></el-table-column>
+<!--      <el-table-column label="提交人" prop="userId"></el-table-column>-->
+      <el-table-column label="操作" width="180" v-if="selectedRows.length===0">
         <template #default="{row}">
           <el-button type="success" @click="approve(row)" v-if="!selectedRows.includes(row)">
             通过
@@ -23,7 +28,7 @@
         :total="total">
     </el-pagination>
 
-    <el-button-group>
+    <el-button-group v-if="selectedRows.length>0">
       <el-button type="success" @click="approveSelected" :disabled="selectedRows.length === 0">
         通过选中
       </el-button>
@@ -35,7 +40,6 @@
 </template>
 
 <script>
-import {mapActions, mapState} from 'vuex'
 import {ElMessage} from 'element-plus'
 
 export default {
@@ -49,29 +53,28 @@ export default {
       selectedRows: []
     }
   },
-  computed: {
-    ...mapState(['token'])
-  },
+  computed: {},
   mounted() {
     this.getData()
   },
   methods: {
-    ...mapActions(['setToken']),
+    handleSelectionChange(selection) {
+      this.selectedRows = selection;
+      console.log(selection)
+    },
     getData() {
-      this.$axios.get(`/api/audit?page=${this.currentPage}&size=${this.pageSize}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      })
+      let page= this.currentPage;
+      let size= this.pageSize;
+      this.$axios.get(this.$store.state.url + '/web/address/getUnapproved?page=' + page + '&size=' + size)
           .then((res) => {
-            this.tableData = res.data.content
-            this.total = res.data.totalElements
+            console.log(res)
+            this.tableData = res.data.list
+            this.total = this.tableData.length
           })
           .catch((error) => {
             if (error.response && error.response.status === 401) {
               ElMessage.error('登录信息已失效，请重新登录')
-              this.setToken(null)
-              this.$router.push('/login')
+              this.$router.push('/login/loginPage')
             } else {
               ElMessage.error('获取数据失败')
             }
@@ -87,86 +90,72 @@ export default {
       this.getData()
     },
     approve(row) {
-      this.$axios.put('/api/audit/${row.id}/approve', {}, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
+      let id=row.addressId
+      this.$axios.post(this.$store.state.url + '/web/address/approveSingle', {
+          id
       })
           .then(() => {
             ElMessage.success('已通过审核')
-            this.tableData.splice(this.tableData.indexOf(row), 1)
+            this.getData()
           })
           .catch((error) => {
             if (error.response && error.response.status === 401) {
               ElMessage.error('登录信息已失效，请重新登录')
-              this.setToken(null)
-              this.$router.push('/login')
+              this.$router.push('/login/loginPage')
             } else {
               ElMessage.error('操作失败')
             }
           })
     },
     reject(row) {
-      this.$axios.put('/api/audit/${row.id}/reject', {}, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
+      let id=row.addressId
+      this.$axios.post(this.$store.state.url + '/web/address/rejectSingle', {
+        id
       })
           .then(() => {
             ElMessage.success('已拒绝审核')
             this.tableData.splice(this.tableData.indexOf(row), 1)
+            this.total = this.tableData.length
           })
           .catch((error) => {
             if (error.response && error.response.status === 401) {
               ElMessage.error('登录信息已失效，请重新登录')
-              this.setToken(null)
-              this.$router.push('/login')
+              this.$router.push('/login/loginPage')
             } else {
               ElMessage.error('操作失败')
             }
           })
     },
     approveSelected() {
-      this.$axios.put('/api/audit/approve', {ids: this.selectedRows.map(row => row.id)}, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      })
+      this.$axios.post(this.$store.state.url + '/web/address/approveMulti', {ids: this.selectedRows.map(row => row.addressId)}
+      )
           .then(() => {
             ElMessage.success('已通过审核')
-            this.selectedRows.forEach(row => {
-              this.tableData.splice(this.tableData.indexOf(row), 1)
-            })
-            this.selectedRows = []
+            this.getData()
           })
           .catch((error) => {
             if (error.response && error.response.status === 401) {
               ElMessage.error('登录信息已失效，请重新登录')
-              this.setToken(null)
-              this.$router.push('/login')
+              this.$router.push('/login/loginPage')
             } else {
               ElMessage.error('操作失败')
             }
           })
     },
     rejectSelected() {
-      this.$axios.put('/api/audit/reject', {ids: this.selectedRows.map(row => row.id)}, {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      })
+      this.$axios.post(this.$store.state.url + '/web/address/rejectMulti', {ids: this.selectedRows.map(row => row.addressId)}, )
           .then(() => {
             ElMessage.success('已拒绝审核')
             this.selectedRows.forEach(row => {
               this.tableData.splice(this.tableData.indexOf(row), 1)
             })
+            this.total = this.tableData.length
             this.selectedRows = []
           })
           .catch((error) => {
             if (error.response && error.response.status === 401) {
               ElMessage.error('登录信息已失效，请重新登录')
-              this.setToken(null)
-              this.$router.push('/login')
+              this.$router.push('/login/loginPage')
             } else {
               ElMessage.error('操作失败')
             }
