@@ -8,8 +8,9 @@
     </el-sub-menu>
     <el-sub-menu index="/management">
       <template #title>管理</template>
-      <el-menu-item index="/management/address">兴趣点管理</el-menu-item>
-      <el-menu-item index="/management/standard">标准地址管理</el-menu-item>
+      <el-menu-item index="/management/poi">兴趣点管理</el-menu-item>
+      <el-menu-item index="/management/address">标准地址管理</el-menu-item>
+      <el-menu-item index="/management/type">兴趣点类别管理</el-menu-item>
     </el-sub-menu>
     <el-sub-menu index="/admin">
       <template #title>用户管理</template>

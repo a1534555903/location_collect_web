@@ -12,7 +12,12 @@ const route = [
     },
     {
         path: '/review/address',
-        component: () => import('@/components/review/address.vue'),
+        component: () => import('@/components/review/myAddress.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/review/poi',
+        component: () => import('@/components/review/poi.vue'),
         meta: { requiresAuth: true },
     },
     {

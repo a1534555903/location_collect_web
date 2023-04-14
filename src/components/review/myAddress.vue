@@ -7,7 +7,7 @@
       <el-table-column label="街道" prop="streetCode"></el-table-column>
       <el-table-column label="经度" prop="longitude"></el-table-column>
       <el-table-column label="纬度" prop="latitude"></el-table-column>
-<!--      <el-table-column label="提交人" prop="userId"></el-table-column>-->
+      <!--      <el-table-column label="提交人" prop="userId"></el-table-column>-->
       <el-table-column label="操作" width="180" v-if="selectedRows.length===0">
         <template #default="{row}">
           <el-button type="success" @click="approve(row)" v-if="!selectedRows.includes(row)">
@@ -25,6 +25,8 @@
         @current-change="handleCurrentChange"
         :page-sizes="[10, 20, 50]"
         :page-size="pageSize"
+        :current-page="currentPage"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="total">
     </el-pagination>
 
@@ -43,7 +45,7 @@
 import {ElMessage} from 'element-plus'
 
 export default {
-  name: 'AuditList',
+  name: 'myAddress',
   data() {
     return {
       tableData: [],
@@ -63,8 +65,8 @@ export default {
       console.log(selection)
     },
     getData() {
-      let page= this.currentPage;
-      let size= this.pageSize;
+      let page = this.currentPage;
+      let size = this.pageSize;
       this.$axios.get(this.$store.state.url + '/web/address/getUnapproved?page=' + page + '&size=' + size)
           .then((res) => {
             console.log(res)
@@ -90,9 +92,9 @@ export default {
       this.getData()
     },
     approve(row) {
-      let id=row.addressId
+      let id = row.addressId
       this.$axios.post(this.$store.state.url + '/web/address/approveSingle', {
-          id
+        id
       })
           .then(() => {
             ElMessage.success('已通过审核')
@@ -108,7 +110,7 @@ export default {
           })
     },
     reject(row) {
-      let id=row.addressId
+      let id = row.addressId
       this.$axios.post(this.$store.state.url + '/web/address/rejectSingle', {
         id
       })
@@ -143,7 +145,7 @@ export default {
           })
     },
     rejectSelected() {
-      this.$axios.post(this.$store.state.url + '/web/address/rejectMulti', {ids: this.selectedRows.map(row => row.addressId)}, )
+      this.$axios.post(this.$store.state.url + '/web/address/rejectMulti', {ids: this.selectedRows.map(row => row.addressId)},)
           .then(() => {
             ElMessage.success('已拒绝审核')
             this.selectedRows.forEach(row => {
