@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
+    <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading">
       <el-table-column type="selection" width="55"/>
       <el-table-column label="路" prop="road"></el-table-column>
       <el-table-column label="号" prop="door"></el-table-column>
@@ -52,7 +52,8 @@ export default {
       pageSize: 10,
       currentPage: 1,
       total: 0,
-      selectedRows: []
+      selectedRows: [],
+      loading: false
     }
   },
   computed: {},
@@ -67,6 +68,7 @@ export default {
     getData() {
       let page = this.currentPage;
       let size = this.pageSize;
+      this.loading = true
       this.$axios.get(this.$store.state.url + '/web/address/getUnapproved?page=' + page + '&size=' + size)
           .then((res) => {
             console.log(res)
@@ -80,6 +82,9 @@ export default {
             } else {
               ElMessage.error('获取数据失败')
             }
+          })
+          .finally(() => {
+            this.loading = false
           })
     },
     handleSizeChange(val) {

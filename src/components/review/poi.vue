@@ -1,12 +1,12 @@
 <template>
   <div>
-    <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
+    <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading">
       <el-table-column type="selection" width="55"/>
       <el-table-column label="兴趣点名" prop="poiName"></el-table-column>
       <el-table-column label="兴趣点类别" prop="typeNames"></el-table-column>
       <el-table-column label="标准地址" prop="address"></el-table-column>
       <el-table-column label="区名" prop="districtName"></el-table-column>
-<!--      <el-table-column label="提交人" prop="userId"></el-table-column>-->
+      <!--      <el-table-column label="提交人" prop="userId"></el-table-column>-->
       <el-table-column label="操作" width="180" v-if="selectedRows.length===0">
         <template #default="{row}">
           <el-button type="success" @click="approve(row)" v-if="!selectedRows.includes(row)">
@@ -24,6 +24,7 @@
         @current-change="handleCurrentChange"
         :page-sizes="[10, 20, 50]"
         :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="total">
     </el-pagination>
 
@@ -49,7 +50,8 @@ export default {
       pageSize: 10,
       currentPage: 1,
       total: 0,
-      selectedRows: []
+      selectedRows: [],
+      loading: false
     }
   },
   computed: {},
@@ -62,8 +64,9 @@ export default {
       console.log(selection)
     },
     getData() {
-      let page= this.currentPage;
-      let size= this.pageSize;
+      let page = this.currentPage;
+      let size = this.pageSize;
+      this.loading = true
       this.$axios.get(this.$store.state.url + '/web/poi/getUnapproved?page=' + page + '&size=' + size)
           .then((res) => {
             console.log(res)
@@ -78,6 +81,9 @@ export default {
               ElMessage.error('获取数据失败')
             }
           })
+          .finally(() => {
+            this.loading = false
+          })
     },
     handleSizeChange(val) {
       this.pageSize = val
@@ -89,9 +95,9 @@ export default {
       this.getData()
     },
     approve(row) {
-      let id=row.poiId
+      let id = row.poiId
       this.$axios.post(this.$store.state.url + '/web/poi/approveSingle', {
-          id
+        id
       })
           .then(() => {
             ElMessage.success('已通过审核')
@@ -107,7 +113,7 @@ export default {
           })
     },
     reject(row) {
-      let id=row.poiId
+      let id = row.poiId
       this.$axios.post(this.$store.state.url + '/web/poi/rejectSingle', {
         id
       })
@@ -142,7 +148,7 @@ export default {
           })
     },
     rejectSelected() {
-      this.$axios.post(this.$store.state.url + '/web/poi/rejectMulti', {ids: this.selectedRows.map(row => row.poiId)}, )
+      this.$axios.post(this.$store.state.url + '/web/poi/rejectMulti', {ids: this.selectedRows.map(row => row.poiId)},)
           .then(() => {
             ElMessage.success('已拒绝审核')
             this.selectedRows.forEach(row => {

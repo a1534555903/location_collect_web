@@ -24,6 +24,11 @@ const route = [
         path: '/admin/reset',
         component: () => import('@/components/login/resetPassword.vue'),
         meta: { requiresAuth: true },
+    },
+    {
+      path: '/management/type',
+        component: () => import('@/components/management/type.vue'),
+        meta: { requiresAuth: true },
     }
 
 ]
