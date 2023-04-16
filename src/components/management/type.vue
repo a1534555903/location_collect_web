@@ -24,19 +24,7 @@
       删除选中
     </el-button>
     <el-button type="primary" @click="handleAdd">添加</el-button>
-    <el-dialog v-model="dialogVisible" title="编辑类别" :close-on-click-modal="false"
-               :before-close="handleCloseDialog">
-      <el-form ref="editForm" :model="editForm" :rules="rules" label-width="80px">
-        <el-form-item label="类别" prop="category">
-          <el-input v-model="editForm.category"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleSave">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog v-model="addDialogVisible" title="添加类别" :close-on-click-modal="false"
+    <el-dialog v-model="dialogVisible" :title="editForm.title" :close-on-click-modal="false"
                :before-close="handleCloseDialog">
       <el-form ref="editForm" :model="editForm" :rules="rules" label-width="80px">
         <el-form-item label="类别" prop="category">
@@ -68,7 +56,9 @@ export default {
       dialogVisible: false, // 编辑对话框是否可见
       addDialogVisible: false, // 添加对话框是否可见
       editForm: { // 编辑表单数据
-        category: ''
+        category: '',
+        id: '',
+        title: ''
       },
       rules: { // 表单验证规则
         category: [
@@ -110,13 +100,15 @@ export default {
     },
 // 处理删除
     handleDelete(row) {
-      const id = row.id
+      const id = row.typeId
       this.$confirm('确认删除该记录吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        axios.delete('http://example.com/api/${id}').then(() => {
+        this.$axios.post(this.$store.state.url + '/web/type/deleteSingle',{
+          id: id
+        }).then(() => {
           this.$message({
             type: 'success',
             message: '删除成功!'
@@ -140,14 +132,14 @@ export default {
         })
         return
       }
-      this.$confirm('确认删除这 ${this.multipleSelection.length} 条记录吗？', '提示', {
+      this.$confirm(`确认删除这 ${this.multipleSelection.length} 条记录吗？`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        const ids = this.multipleSelection.map(item => item.id)
-        axios.delete('http://example.com/api/batch-delete', {
-          data: ids
+        const ids = this.multipleSelection.map(item => item.typeId)
+        this.$axios.post(this.$store.state.url + '/web/type/deleteMulti', {
+          ids: ids
         }).then(() => {
           this.$message({
             type: 'success',
@@ -176,29 +168,33 @@ export default {
 // 处理添加
     handleAdd() {
       this.dialogVisible = true
-      console.log(this.dialogForm, this.dialogVisible)
-      this.dialogForm.title = '添加记录'
-      this.dialogForm.category = ''
+      console.log(this.editForm, this.dialogVisible)
+      this.editForm.title = '添加记录'
+      this.editForm.category = ''
+      this.editForm.id = ''
     },
 // 处理修改
-    handleEdit(index, row) {
+    handleEdit(row) {
       this.dialogVisible = true
-      this.dialogForm.title = '修改记录'
-      this.dialogForm.category = row.category
-      this.dialogForm.id = row.id
+      this.editForm.title = '修改记录'
+      console.log(row)
+      this.editForm.category = row.typeName
+      this.editForm.typeId = row.typeId
     },
 // 处理保存
     handleSave() {
-      if (this.dialogForm.category === '') {
+      if (this.editForm.category === '') {
         this.$message({
           type: 'warning',
           message: '请填写类别'
         })
         return
       }
-      if (this.dialogForm.id === '') {
+      if (this.editForm.id === '') {
 // 添加记录
-        axios.post('http://example.com/api/', this.dialogForm).then(() => {
+        this.$axios.post(this.$store.state.url + '/web/type/add',{
+          typeName: this.editForm.category
+        }).then(() => {
           this.$message({
             type: 'success',
             message: '添加成功!'
@@ -209,7 +205,10 @@ export default {
         })
       } else {
 // 修改记录
-        axios.put('http://example.com/api/${this.dialogForm.id}', this.dialogForm).then(() => {
+        this.$axios.post(this.$store.state.url + '/web/type/update',{
+          typeName: this.editForm.category,
+          id: this.editForm.id
+        }).then(() => {
           this.$message({
             type: 'success',
             message: '修改成功!'
