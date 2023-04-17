@@ -1,6 +1,7 @@
 <template>
   <div>
-    <el-input v-model="searchText" placeholder="请输入搜索内容" @keyup.enter="handleSearch" style="width: 200px; margin-right: 10px;"></el-input>
+    <el-input v-model="searchText" placeholder="请输入搜索内容" @keyup.enter="handleSearch"
+              style="width: 200px; margin-right: 10px;"></el-input>
     <el-button type="primary" @click="handleSearch">搜索</el-button>
     <el-table :data="tableData" v-loading="loading" style="margin-top: 10px;" @selection-change="handleSelectionChange">
       <el-table-column type="selection"></el-table-column>
@@ -106,7 +107,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post(this.$store.state.url + '/web/type/deleteSingle',{
+        this.$axios.post(this.$store.state.url + '/web/type/deleteSingle', {
           id: id
         }).then(() => {
           this.$message({
@@ -179,7 +180,7 @@ export default {
       this.editForm.title = '修改记录'
       console.log(row)
       this.editForm.category = row.typeName
-      this.editForm.typeId = row.typeId
+      this.editForm.id = row.typeId
     },
 // 处理保存
     handleSave() {
@@ -192,7 +193,7 @@ export default {
       }
       if (this.editForm.id === '') {
 // 添加记录
-        this.$axios.post(this.$store.state.url + '/web/type/add',{
+        this.$axios.post(this.$store.state.url + '/web/type/add', {
           typeName: this.editForm.category
         }).then(() => {
           this.$message({
@@ -202,10 +203,12 @@ export default {
 // 添加成功后关闭对话框，重新加载数据
           this.dialogVisible = false
           this.loadData()
+        }).catch(err => {
+          ElMessage.error('添加失败,请检查添加的内容是否正确')
         })
       } else {
 // 修改记录
-        this.$axios.post(this.$store.state.url + '/web/type/update',{
+        this.$axios.post(this.$store.state.url + '/web/type/update', {
           typeName: this.editForm.category,
           id: this.editForm.id
         }).then(() => {
@@ -216,6 +219,8 @@ export default {
 // 修改成功后关闭对话框，重新加载数据
           this.dialogVisible = false
           this.loadData()
+        }).catch(err => {
+          ElMessage.error('修改失败,请检查修改的内容是否正确')
         })
       }
     },
