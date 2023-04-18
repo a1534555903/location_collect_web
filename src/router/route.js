@@ -29,6 +29,11 @@ const route = [
       path: '/management/type',
         component: () => import('@/components/management/type.vue'),
         meta: { requiresAuth: true },
+    },
+    {
+        path: '/management/poi',
+        component: () => import('@/components/management/poiManage.vue'),
+        meta: { requiresAuth: true },
     }
 
 ]
