@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form ref="searchForm" :model="searchForm" :rules="rules" label-width="80px">
+    <el-form ref="searchForm" :model="searchForm" label-width="80px">
       <el-form-item label="兴趣点名" prop="poiName">
         <el-input v-model="searchForm.poiName"></el-input>
       </el-form-item>
@@ -9,7 +9,8 @@
       </el-form-item>
       <el-form-item label="类别" prop="category">
         <el-checkbox-group v-model="searchForm.typeNames">
-          <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{item.typeName}}</el-checkbox>
+          <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{ item.typeName }}
+          </el-checkbox>
         </el-checkbox-group>
       </el-form-item>
     </el-form>
@@ -39,7 +40,6 @@
     <el-button type="success" @click="handleBatchDelete" v-if="multipleSelection.length>0">
       删除选中
     </el-button>
-    <el-button type="primary" @click="handleEdit">编辑</el-button>
     <el-dialog v-model="dialogVisible" title="编辑" :close-on-click-modal="false" :before-close="handleCloseDialog">
       <el-form ref="editForm" :model="editForm" :rules="rules" label-width="80px">
         <el-form-item label="兴趣点名" prop="poiName">
@@ -47,13 +47,13 @@
         </el-form-item>
         <el-form-item label="类别" prop="typeNames">
           <el-checkbox-group v-model="editForm.typeNames">
-            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{item.typeName}}</el-checkbox>
+            <el-checkbox v-for="item in typeList" :label="item.typeName" :key="item.typeId" ref="typeCheckbox" @change="handleCheckboxChange">{{item.typeName}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取消</el-button>
-    <el-button type="primary" @click="handleAddSave">确定</el-button>
+        <el-button type="primary" @click="handleAddSave">确定</el-button>
+        <el-button @click="dialogVisible = false">取消</el-button>
   </span>
     </el-dialog>
     <el-button type="primary" @click="handleAdd">添加</el-button>
@@ -67,7 +67,8 @@
         </el-form-item>
         <el-form-item label="类别" prop="category">
           <el-checkbox-group v-model="addForm.typeNames">
-            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{item.typeName}}</el-checkbox>
+            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{ item.typeName }}
+            </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -143,7 +144,7 @@ export default {
         this.loading = false
       })
     },
-    loadTypes(){
+    loadTypes() {
       this.$axios.get(this.$store.state.url + '/web/type/allTypes'
       ).then(resp => {
         console.log(resp)
@@ -218,7 +219,24 @@ export default {
 // 处理搜索
     handleSearch() {
       this.currentPage = 1
-      this.loadData()
+      this.loading = true
+      this.$axios.post(this.$store.state.url + '/web/poi/search', {
+            searchPOI: this.searchForm.poiName,
+            searchAddress: this.searchForm.address,
+            typeIds: this.searchForm.typeNames,
+            page: this.currentPage,
+            size: this.pageSize
+          }
+      ).then(resp => {
+        console.log(resp)
+        this.tableData = resp.data.list
+        this.total = this.tableData.length
+      }).catch(err => {
+        console.error(err)
+        ElMessage.error('加载数据失败')
+      }).finally(() => {
+        this.loading = false
+      })
     },
 // 处理重置
     handleReset() {
@@ -238,13 +256,14 @@ export default {
 // 处理修改
     handleEdit(row) {
       this.dialogVisible = true
-      this.editForm.poiName= row.poiName
+      this.editForm.poiName = row.poiName
       this.editForm.typeNames = row.typeNames
+
       this.editForm.id = row.poiId
       this.loadTypes()
     },
 // 处理保存
-    handleAddSave(){
+    handleAddSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
           this.$axios.post(this.$store.state.url + '/web/poi/add', {
@@ -276,7 +295,7 @@ export default {
       })
     },
 // 处理保存
-    handleEditSave(){
+    handleEditSave() {
       this.$refs['editForm'].validate((valid) => {
         if (valid) {
           this.$axios.post(this.$store.state.url + '/web/poi/update', {
@@ -315,6 +334,10 @@ export default {
           })
           .catch(_ => {
           })
+    },
+    handleCheckboxChange(checkedItems) {
+      const selectedTypeIds = checkedItems.map(item => item.label);
+      this.editForm.typeNames = selectedTypeIds.join(',');
     }
   },
   mounted() {
