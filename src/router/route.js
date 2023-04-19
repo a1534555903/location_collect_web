@@ -34,8 +34,17 @@ const route = [
         path: '/management/poi',
         component: () => import('@/components/management/poiManage.vue'),
         meta: { requiresAuth: true },
-    }
-
+    },
+    {
+        path: '/management/address',
+        component: () => import('@/components/management/addressManage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/management/street',
+        component: () => import('@/components/management/streetManage.vue'),
+        meta: { requiresAuth: true },
+    },
 ]
 const router = VueRouter.createRouter({
     history: VueRouter.createWebHashHistory(),

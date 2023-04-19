@@ -1,14 +1,14 @@
 <template>
     <div>
-      <el-form ref="searchForm" :model="searchForm" :rules="rules" label-width="80px">
+      <el-form ref="searchForm" :model="searchForm" label-width="80px">
         <el-form-item label="街道号" prop="streetCode">
-          <el-input v-model="searchForm.streetCode"></el-input>
+          <el-input v-model="searchForm.streetCode" @keyup.enter="handleSearch"></el-input>
         </el-form-item>
         <el-form-item label="街道名" prop="streetName">
-          <el-input v-model="searchForm.streetName"></el-input>
+          <el-input v-model="searchForm.streetName" @keyup.enter="handleSearch"></el-input>
         </el-form-item>
         <el-form-item label="区名" prop="districtName">
-            <el-input v-model="searchForm.districtName"></el-input>
+            <el-input v-model="searchForm.districtName" @keyup.enter="handleSearch"></el-input>
         </el-form-item>
       </el-form>
       <el-button type="primary" @click="handleSearch">搜索</el-button>
@@ -36,16 +36,16 @@
         删除选中
       </el-button>
       <el-button type="primary" @click="handleAdd">添加</el-button>
-      <el-dialog v-model="dialogVisible" title="编辑" :close-on-click-modal="false" :before-close="handleCloseDialog">
+      <el-dialog v-model="dialogVisible" :title="editForm.title" :close-on-click-modal="false" :before-close="handleCloseDialog">
         <el-form ref="editForm" :model="editForm" :rules="rules" label-width="80px">
             <el-form-item label="街道号" prop="streetCode">
-          <el-input v-model="searchForm.streetCode"></el-input>
+          <el-input v-model="editForm.streetCode" type="number"></el-input>
         </el-form-item>
         <el-form-item label="街道名" prop="streetName">
-          <el-input v-model="searchForm.streetName"></el-input>
+          <el-input v-model="editForm.streetName"></el-input>
         </el-form-item>
         <el-form-item label="区名" prop="districtName">
-            <el-input v-model="searchForm.districtName"></el-input>
+            <el-input v-model="editForm.districtName"></el-input>
         </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -73,21 +73,27 @@
         dialogVisible: false, // 编辑对话框是否可见
         addDialogVisible: false, // 添加对话框是否可见
         editForm: { // 编辑表单数据
-          poiName: '',
-          typeNames: [],
-          id: '',
-          title: ''
+            streetCode: '',
+            streetName: '',
+            districtName: '',
+            title: '',
         },
         searchForm: { // 搜索表单数据
-          poiName: '',
-          address: '',
-          typeNames: []
+            streetCode: '',
+            streetName: '',
+            districtName: '',
         },
         typeList: [], // 类别列表
         rules: { // 表单验证规则
-          category: [
-            {required: true, message: '请输入类别名称', trigger: 'blur'}
-          ]
+          streetCode: [
+            {required: true, message: '请输入街道号', trigger: 'blur'}
+          ],
+            streetName: [
+                {required: true, message: '请输入街道名', trigger: 'blur'}
+            ],
+            districtName: [
+                {required: true, message: '请输入区名', trigger: 'blur'}
+            ]
         },
         multipleSelection: [] // 多选数据
       }
@@ -115,16 +121,6 @@
           ElMessage.error('加载数据失败')
         }).finally(() => {
           this.loading = false
-        })
-      },
-      loadTypes(){
-        this.$axios.get(this.$store.state.url + '/web/type/allTypes'
-        ).then(resp => {
-          console.log(resp)
-          this.typeList = resp.data
-        }).catch(err => {
-          console.error(err)
-          ElMessage.error('加载数据失败')
         })
       },
       // 处理页码改变事件
@@ -196,36 +192,37 @@
       },
   // 处理重置
       handleReset() {
-        this.searchForm.keyword = ''
+        this.searchForm.streetCode = ''
+        this.searchForm.streetName = ''
+        this.searchForm.districtName = ''
+        this.currentPage = 1
         this.loadData()
       },
   // 处理添加
       handleAdd() {
         this.dialogVisible = true
         console.log(this.editForm, this.dialogVisible)
+        this.editForm.streetCode = ''
+        this.editForm.streetName = ''
+        this.editForm.districtName = ''
         this.editForm.title = '添加记录'
-        this.editForm.category = ''
-        this.editForm.id = ''
         this.loadTypes()
       },
   // 处理修改
       handleEdit(row) {
         this.dialogVisible = true
         this.editForm.title = '修改记录'
-        console.log(row)
-        this.editForm.category = row.typeName
-        this.editForm.id = row.typeId
+        // console.log(row)
+        this.editForm.streetCode = row.streetCode
+        this.editForm.streetName = row.streetName
+        this.editForm.districtName = row.districtName
+        this.loadTypes()
       },
   // 处理保存
       handleSave() {
-        if (this.editForm.category === '') {
-          this.$message({
-            type: 'warning',
-            message: '请填写类别'
-          })
-          return
-        }
-        if (this.editForm.id === '') {
+        this.$refs.editForm.validate((valid) => {
+          if (valid) {
+        if (this.editForm.title === '添加记录') {
   // 添加记录
           this.$axios.post(this.$store.state.url + '/web/type/add', {
             typeName: this.editForm.category
@@ -256,8 +253,8 @@
           }).catch(err => {
             ElMessage.error('修改失败,请检查修改的内容是否正确')
           })
-        }
-      },
+        }}
+      })},
   // 处理关闭对话框
       handleCloseDialog(done) {
         this.$confirm('确认关闭？')
@@ -270,7 +267,6 @@
     },
     mounted() {
       this.loadData()
-      this.loadTypes()
     }
   }
   </script>

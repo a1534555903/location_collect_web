@@ -14,6 +14,7 @@
       </el-form-item>
     </el-form>
     <el-button type="primary" @click="handleSearch">搜索</el-button>
+    <el-button type="primary" @click="handleReset">重置</el-button>
     <el-table :data="tableData" v-loading="loading" style="margin-top: 10px;" @selection-change="handleSelectionChange">
       <el-table-column type="selection"></el-table-column>
       <el-table-column label="兴趣点名" prop="poiName"></el-table-column>
@@ -38,13 +39,13 @@
     <el-button type="success" @click="handleBatchDelete" v-if="multipleSelection.length>0">
       删除选中
     </el-button>
-    <el-button type="primary" @click="handleAdd">添加</el-button>
+    <el-button type="primary" @click="handleEdit">编辑</el-button>
     <el-dialog v-model="dialogVisible" title="编辑" :close-on-click-modal="false" :before-close="handleCloseDialog">
       <el-form ref="editForm" :model="editForm" :rules="rules" label-width="80px">
         <el-form-item label="兴趣点名" prop="poiName">
           <el-input v-model="editForm.poiName"></el-input>
         </el-form-item>
-        <el-form-item label="类别" prop="category">
+        <el-form-item label="类别" prop="typeNames">
           <el-checkbox-group v-model="editForm.typeNames">
             <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{item.typeName}}</el-checkbox>
           </el-checkbox-group>
@@ -52,10 +53,29 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
     <el-button @click="dialogVisible = false">取消</el-button>
-    <el-button type="primary" @click="handleSave">确定</el-button>
+    <el-button type="primary" @click="handleAddSave">确定</el-button>
   </span>
     </el-dialog>
-
+    <el-button type="primary" @click="handleAdd">添加</el-button>
+    <el-dialog v-model="addDialogVisible" title="添加" :close-on-click-modal="false" :before-close="handleCloseDialog">
+      <el-form ref="addForm" :model="addForm" :rules="rules" label-width="80px">
+        <el-form-item label="兴趣点名" prop="poiName">
+          <el-input v-model="addForm.poiName"></el-input>
+        </el-form-item>
+        <el-form-item label="标准地址" prop="address">
+          <el-input v-model="addForm.address"></el-input>
+        </el-form-item>
+        <el-form-item label="类别" prop="category">
+          <el-checkbox-group v-model="addForm.typeNames">
+            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{item.typeName}}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false">取消</el-button>
+    <el-button type="primary" @click="handleEditSave">确定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -78,7 +98,11 @@ export default {
         poiName: '',
         typeNames: [],
         id: '',
-        title: ''
+      },
+      addForm: { // 编辑表单数据
+        poiName: '',
+        typeNames: [],
+        address: '',
       },
       searchForm: { // 搜索表单数据
         poiName: '',
@@ -87,9 +111,9 @@ export default {
       },
       typeList: [], // 类别列表
       rules: { // 表单验证规则
-        category: [
-          {required: true, message: '请输入类别名称', trigger: 'blur'}
-        ]
+        poiName: [
+          {required: true, message: '请输入兴趣点名', trigger: 'blur'}
+        ],
       },
       multipleSelection: [] // 多选数据
     }
@@ -198,67 +222,90 @@ export default {
     },
 // 处理重置
     handleReset() {
-      this.searchForm.keyword = ''
+      this.searchForm.poiName = ''
+      this.searchForm.address = ''
+      this.searchForm.typeNames = []
       this.loadData()
     },
 // 处理添加
     handleAdd() {
-      this.dialogVisible = true
-      console.log(this.editForm, this.dialogVisible)
-      this.editForm.title = '添加记录'
-      this.editForm.category = ''
-      this.editForm.id = ''
+      this.addDialogVisible = true
+      this.addForm.poiName = ''
+      this.addForm.typeNames = []
+      this.addForm.address = ''
       this.loadTypes()
     },
 // 处理修改
     handleEdit(row) {
       this.dialogVisible = true
-      this.editForm.title = '修改记录'
-      console.log(row)
-      this.editForm.category = row.typeName
-      this.editForm.id = row.typeId
+      this.editForm.poiName= row.poiName
+      this.editForm.typeNames = row.typeNames
+      this.editForm.id = row.poiId
+      this.loadTypes()
     },
 // 处理保存
-    handleSave() {
-      if (this.editForm.category === '') {
-        this.$message({
-          type: 'warning',
-          message: '请填写类别'
-        })
-        return
-      }
-      if (this.editForm.id === '') {
-// 添加记录
-        this.$axios.post(this.$store.state.url + '/web/type/add', {
-          typeName: this.editForm.category
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '添加成功!'
+    handleAddSave(){
+      this.$refs['addForm'].validate((valid) => {
+        if (valid) {
+          this.$axios.post(this.$store.state.url + '/web/poi/add', {
+            poiName: this.addForm.poiName,
+            typeNames: this.addForm.typeNames,
+            address: this.addForm.address
+          }).then(resp => {
+            console.log(resp)
+            if (resp.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '添加成功!'
+              })
+              this.addDialogVisible = false
+              this.loadData()
+            } else {
+              this.$message({
+                type: 'error',
+                message: '添加失败!'
+              })
+            }
+          }).catch(err => {
+            console.error(err)
+            ElMessage.error('添加失败')
           })
-// 添加成功后关闭对话框，重新加载数据
-          this.dialogVisible = false
-          this.loadData()
-        }).catch(err => {
-          ElMessage.error('添加失败,请检查添加的内容是否正确')
-        })
-      } else {
-// 修改记录
-        this.$axios.post(this.$store.state.url + '/web/type/update', {
-          typeName: this.editForm.category,
-          id: this.editForm.id
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '修改成功!'
+        } else {
+          return false
+        }
+      })
+    },
+// 处理保存
+    handleEditSave(){
+      this.$refs['editForm'].validate((valid) => {
+        if (valid) {
+          this.$axios.post(this.$store.state.url + '/web/poi/update', {
+            poiName: this.editForm.poiName,
+            typeNames: this.editForm.typeNames,
+            poiId: this.editForm.id
+          }).then(resp => {
+            console.log(resp)
+            if (resp.data.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '修改成功!'
+              })
+              this.dialogVisible = false
+              this.loadData()
+            } else {
+              this.$message({
+                type: 'error',
+                message: '修改失败!'
+              })
+            }
+          }).catch(err => {
+            console.error(err)
+            ElMessage.error('修改失败')
           })
-// 修改成功后关闭对话框，重新加载数据
-          this.dialogVisible = false
-          this.loadData()
-        }).catch(err => {
-          ElMessage.error('修改失败,请检查修改的内容是否正确')
-        })
-      }
+        } else {
+          return false
+        }
+      })
     },
 // 处理关闭对话框
     handleCloseDialog(done) {
