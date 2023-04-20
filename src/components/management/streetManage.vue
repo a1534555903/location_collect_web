@@ -111,7 +111,7 @@
       // 加载数据
       loadData() {
         this.loading = true
-        this.$axios.get(this.$store.state.url + '/web/poi/getApproved?page=' + this.currentPage + '&size=' + this.pageSize
+        this.$axios.get(this.$store.state.url + '/web/street/all?pageNum=' + this.currentPage + '&pageSize=' + this.pageSize
         ).then(resp => {
           console.log(resp)
           this.tableData = resp.data.list
@@ -130,14 +130,14 @@
       },
   // 处理删除
       handleDelete(row) {
-        const id = row.typeId
+        const id = row.streetCode
         this.$confirm('确认删除该记录吗?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$axios.post(this.$store.state.url + '/web/type/deleteSingle', {
-            id: id
+          this.$axios.post(this.$store.state.url + '/web/street/deleteSingle', {
+            streetCode: id
           }).then(() => {
             this.$message({
               type: 'success',
@@ -167,9 +167,9 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          const ids = this.multipleSelection.map(item => item.typeId)
-          this.$axios.post(this.$store.state.url + '/web/type/deleteMulti', {
-            ids: ids
+          const ids = this.multipleSelection.map(item => item.streetCode)
+          this.$axios.post(this.$store.state.url + '/web/street/deleteMulti', {
+            streetCodes: ids
           }).then(() => {
             this.$message({
               type: 'success',
@@ -188,7 +188,25 @@
   // 处理搜索
       handleSearch() {
         this.currentPage = 1
-        this.loadData()
+        this.loading = true
+        this.$axios.Post(this.$store.state.url + '/web/street/search', 
+          {
+            streetCode: this.searchForm.streetCode,
+            streetName: this.searchForm.streetName,
+            districtName: this.searchForm.districtName,
+            pageNum: this.currentPage,
+            pageSize: this.pageSize
+          }
+        ).then(resp => {
+          console.log(resp)
+          this.tableData = resp.data.list
+          this.total = this.tableData.length
+        }).catch(err => {
+          console.error(err)
+          ElMessage.error('加载数据失败')
+        }).finally(() => {
+          this.loading = false
+        })
       },
   // 处理重置
       handleReset() {
@@ -224,8 +242,10 @@
           if (valid) {
         if (this.editForm.title === '添加记录') {
   // 添加记录
-          this.$axios.post(this.$store.state.url + '/web/type/add', {
-            typeName: this.editForm.category
+          this.$axios.post(this.$store.state.url + '/web/street/add', {
+            streetCode: this.editForm.streetCode,
+            streetName: this.editForm.streetName,
+            districtName: this.editForm.districtName
           }).then(() => {
             this.$message({
               type: 'success',
@@ -239,9 +259,10 @@
           })
         } else {
   // 修改记录
-          this.$axios.post(this.$store.state.url + '/web/type/update', {
-            typeName: this.editForm.category,
-            id: this.editForm.id
+          this.$axios.post(this.$store.state.url + '/web/street/edit', {
+            streetCode: this.editForm.streetCode,
+            streetName: this.editForm.streetName,
+            districtName: this.editForm.districtName
           }).then(() => {
             this.$message({
               type: 'success',
