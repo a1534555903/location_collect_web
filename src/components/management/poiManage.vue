@@ -46,8 +46,8 @@
           <el-input v-model="editForm.poiName"></el-input>
         </el-form-item>
         <el-form-item label="类别" prop="typeNames">
-          <el-checkbox-group v-model="editForm.typeNames">
-            <el-checkbox v-for="item in typeList" :label="item.typeName" :key="item.typeId" ref="typeCheckbox" @change="handleCheckboxChange">{{item.typeName}}</el-checkbox>
+          <el-checkbox-group v-model="editForm.typeIds">
+            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId" ref="typeCheckbox">{{item.typeName}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -66,7 +66,7 @@
           <el-input v-model="addForm.address"></el-input>
         </el-form-item>
         <el-form-item label="类别" prop="category">
-          <el-checkbox-group v-model="addForm.typeNames">
+          <el-checkbox-group v-model="addForm.typeIds">
             <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{ item.typeName }}
             </el-checkbox>
           </el-checkbox-group>
@@ -97,12 +97,12 @@ export default {
       addDialogVisible: false, // 添加对话框是否可见
       editForm: { // 编辑表单数据
         poiName: '',
-        typeNames: [],
+        typeIds: [],
         id: '',
       },
       addForm: { // 编辑表单数据
         poiName: '',
-        typeNames: [],
+        typeIds: [],
         address: '',
       },
       searchForm: { // 搜索表单数据
@@ -161,13 +161,13 @@ export default {
     },
 // 处理删除
     handleDelete(row) {
-      const id = row.typeId
+      const id = row.poiId
       this.$confirm('确认删除该记录吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post(this.$store.state.url + '/web/type/deleteSingle', {
+        this.$axios.post(this.$store.state.url + '/web/poi/rejectSingle', {
           id: id
         }).then(() => {
           this.$message({
@@ -198,8 +198,8 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        const ids = this.multipleSelection.map(item => item.typeId)
-        this.$axios.post(this.$store.state.url + '/web/type/deleteMulti', {
+        const ids = this.multipleSelection.map(item => item.poiId)
+        this.$axios.post(this.$store.state.url + '/web/poi/rejectMulti', {
           ids: ids
         }).then(() => {
           this.$message({
@@ -249,7 +249,7 @@ export default {
     handleAdd() {
       this.addDialogVisible = true
       this.addForm.poiName = ''
-      this.addForm.typeNames = []
+      this.addForm.typeIds = []
       this.addForm.address = ''
       this.loadTypes()
     },
@@ -257,7 +257,22 @@ export default {
     handleEdit(row) {
       this.dialogVisible = true
       this.editForm.poiName = row.poiName
-      this.editForm.typeNames = row.typeNames
+      //typeNames是一个字符串,按','分割成数组
+      let typeNames = row.typeNames.split(',')
+      //遍历typeNames数组,将每个typeName转换成typeId,对应关系在typeList中
+      let typeIds = []
+      for (let i = 0; i < typeNames.length; i++) {
+        for (let j = 0; j < this.typeList.length; j++) {
+          if (typeNames[i] === this.typeList[j].typeName) {
+            typeIds.push(this.typeList[j].typeId)
+          }
+        }
+      }
+      this.editForm.typeIds = typeIds
+      //设置ref=typeCheckbox中label在typeIds中的checkbox为选中状态
+      this.$nextTick(() => {
+        this.$refs.typeCheckbox.setCheckedNodes(typeIds)
+      })
 
       this.editForm.id = row.poiId
       this.loadTypes()
@@ -268,7 +283,7 @@ export default {
         if (valid) {
           this.$axios.post(this.$store.state.url + '/web/poi/add', {
             poiName: this.addForm.poiName,
-            typeNames: this.addForm.typeNames,
+            typeIds: this.addForm.typeIds,
             address: this.addForm.address
           }).then(resp => {
             console.log(resp)
@@ -298,9 +313,9 @@ export default {
     handleEditSave() {
       this.$refs['editForm'].validate((valid) => {
         if (valid) {
-          this.$axios.post(this.$store.state.url + '/web/poi/update', {
+          this.$axios.post(this.$store.state.url + '/web/poi/updateSingle', {
             poiName: this.editForm.poiName,
-            typeNames: this.editForm.typeNames,
+            typeIds: this.editForm.typeIds,
             poiId: this.editForm.id
           }).then(resp => {
             console.log(resp)
@@ -337,7 +352,7 @@ export default {
     },
     handleCheckboxChange(checkedItems) {
       const selectedTypeIds = checkedItems.map(item => item.label);
-      this.editForm.typeNames = selectedTypeIds.join(',');
+      this.editForm.typeIds = selectedTypeIds
     }
   },
   mounted() {
