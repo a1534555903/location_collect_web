@@ -189,7 +189,7 @@
       handleSearch() {
         this.currentPage = 1
         this.loading = true
-        this.$axios.Post(this.$store.state.url + '/web/street/search', 
+        this.$axios.post(this.$store.state.url + '/web/street/search',
           {
             streetCode: this.searchForm.streetCode,
             streetName: this.searchForm.streetName,
@@ -231,6 +231,7 @@
         this.dialogVisible = true
         this.editForm.title = '修改记录'
         // console.log(row)
+        this.editForm.origin= row.streetCode
         this.editForm.streetCode = row.streetCode
         this.editForm.streetName = row.streetName
         this.editForm.districtName = row.districtName
@@ -262,7 +263,8 @@
           this.$axios.post(this.$store.state.url + '/web/street/edit', {
             streetCode: this.editForm.streetCode,
             streetName: this.editForm.streetName,
-            districtName: this.editForm.districtName
+            districtName: this.editForm.districtName,
+            origin: this.editForm.origin
           }).then(() => {
             this.$message({
               type: 'success',

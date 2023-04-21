@@ -47,12 +47,14 @@
         </el-form-item>
         <el-form-item label="类别" prop="typeNames">
           <el-checkbox-group v-model="editForm.typeIds">
-            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId" ref="typeCheckbox">{{item.typeName}}</el-checkbox>
+            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId" ref="typeCheckbox">
+              {{ item.typeName }}
+            </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleAddSave">确定</el-button>
+        <el-button type="primary" @click="handleEditSave">确定</el-button>
         <el-button @click="dialogVisible = false">取消</el-button>
   </span>
     </el-dialog>
@@ -74,15 +76,14 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
     <el-button @click="dialogVisible = false">取消</el-button>
-    <el-button type="primary" @click="handleEditSave">确定</el-button>
+    <el-button type="primary" @click="handleAddSave">确定</el-button>
   </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import {ref} from 'vue'
-import {ElMessage, ElMessageBox, ElLoading} from 'element-plus'
+import {ElMessage} from 'element-plus'
 
 export default {
   name: 'poiManage',
@@ -257,8 +258,11 @@ export default {
     handleEdit(row) {
       this.dialogVisible = true
       this.editForm.poiName = row.poiName
-      //typeNames是一个字符串,按','分割成数组
-      let typeNames = row.typeNames.split(',')
+      let typeNames = []
+      if(row.typeNames !== null){
+        //typeNames是一个字符串,按','分割成数组
+        typeNames = row.typeNames.split(',')
+      }
       //遍历typeNames数组,将每个typeName转换成typeId,对应关系在typeList中
       let typeIds = []
       for (let i = 0; i < typeNames.length; i++) {
@@ -273,45 +277,48 @@ export default {
       this.$nextTick(() => {
         this.$refs.typeCheckbox.setCheckedNodes(typeIds)
       })
-
       this.editForm.id = row.poiId
+      console.log(this.editForm)
       this.loadTypes()
     },
 // 处理保存
     handleAddSave() {
-      this.$refs['addForm'].validate((valid) => {
-        if (valid) {
-          this.$axios.post(this.$store.state.url + '/web/poi/add', {
-            poiName: this.addForm.poiName,
-            typeIds: this.addForm.typeIds,
-            address: this.addForm.address
-          }).then(resp => {
-            console.log(resp)
-            if (resp.data.code === 200) {
-              this.$message({
-                type: 'success',
-                message: '添加成功!'
-              })
-              this.addDialogVisible = false
-              this.loadData()
-            } else {
-              this.$message({
-                type: 'error',
-                message: '添加失败!'
-              })
-            }
-          }).catch(err => {
-            console.error(err)
-            ElMessage.error('添加失败')
-          })
-        } else {
-          return false
-        }
+      console.log(this.$refs.addForm)
+      this.$nextTick(() => {
+        this.$refs.addForm.validate((valid) => {
+          if (valid) {
+            this.$axios.post(this.$store.state.url + '/web/poi/add', {
+              poiName: this.addForm.poiName,
+              typeIds: this.addForm.typeIds,
+              address: this.addForm.address
+            }).then(resp => {
+              console.log(resp)
+              if (resp.status === 200) {
+                this.$message({
+                  type: 'success',
+                  message: '添加成功!'
+                })
+                this.addDialogVisible = false
+                this.loadData()
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '添加失败!'
+                })
+              }
+            }).catch(err => {
+              console.error(err)
+              ElMessage.error('添加失败')
+            })
+          } else {
+            return false
+          }
+        })
       })
     },
 // 处理保存
     handleEditSave() {
-      this.$refs['editForm'].validate((valid) => {
+      this.$refs.editForm.validate((valid) => {
         if (valid) {
           this.$axios.post(this.$store.state.url + '/web/poi/updateSingle', {
             poiName: this.editForm.poiName,
@@ -319,7 +326,7 @@ export default {
             poiId: this.editForm.id
           }).then(resp => {
             console.log(resp)
-            if (resp.data.code === 200) {
+            if (resp.status === 200) {
               this.$message({
                 type: 'success',
                 message: '修改成功!'
