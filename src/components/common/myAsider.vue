@@ -1,5 +1,5 @@
 <template>
-  <el-menu class="el-menu-demo" mode="vertical" :default-active="$route.path" router="router">
+  <el-menu  mode="vertical" :default-active="$route.path" router="router">
     <el-menu-item index="/index">首页</el-menu-item>
     <el-sub-menu index="/review">
       <template #title>审核</template>
@@ -19,8 +19,7 @@
     </el-sub-menu>
     <el-sub-menu index="/search">
       <template #title>查找</template>
-      <el-menu-item index="/search/interest">查找兴趣点</el-menu-item>
-      <el-menu-item index="/search/standard">查找标准地址</el-menu-item>
+      <el-menu-item index="/search/address">查找</el-menu-item>
     </el-sub-menu>
   </el-menu>
 </template>

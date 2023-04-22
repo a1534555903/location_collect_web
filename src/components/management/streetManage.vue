@@ -2,13 +2,13 @@
     <div>
       <el-form ref="searchForm" :model="searchForm" label-width="80px">
         <el-form-item label="街道号" prop="streetCode">
-          <el-input v-model="searchForm.streetCode" @keyup.enter="handleSearch"></el-input>
+          <el-input v-model="searchForm.streetCode" @keyup.enter="handleSearch" style="width: 300px"></el-input>
         </el-form-item>
         <el-form-item label="街道名" prop="streetName">
-          <el-input v-model="searchForm.streetName" @keyup.enter="handleSearch"></el-input>
+          <el-input v-model="searchForm.streetName" @keyup.enter="handleSearch" style="width: 300px"></el-input>
         </el-form-item>
         <el-form-item label="区名" prop="districtName">
-            <el-input v-model="searchForm.districtName" @keyup.enter="handleSearch"></el-input>
+            <el-input v-model="searchForm.districtName" @keyup.enter="handleSearch" style="width: 300px"></el-input>
         </el-form-item>
       </el-form>
       <el-button type="primary" @click="handleSearch">搜索</el-button>

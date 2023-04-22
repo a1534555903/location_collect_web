@@ -6,7 +6,7 @@
         <my-header></my-header>
       </el-header>
       <el-container>
-        <el-aside width="200px">
+        <el-aside width="200px"  style="padding-top: 5px">
           <my-asider></my-asider>
         </el-aside>
         <!-- 主体内容区域 -->

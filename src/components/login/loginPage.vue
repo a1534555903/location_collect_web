@@ -1,18 +1,19 @@
 <template>
-  <div class="login-container">
+  <div class="login-container" style="display: flex; flex-direction: column; align-items: center;">
     <el-form ref="form" :model="loginForm" label-width="80px" :rules="rules">
       <el-form-item label="用户名" prop="username">
-        <el-input v-model="loginForm.username"></el-input>
+        <el-input v-model="loginForm.username" style="width: 300px"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input v-model="loginForm.password" type="password"></el-input>
+        <el-input v-model="loginForm.password" type="password" style="width: 300px"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm" style="display: block; margin: 0 auto;">登录</el-button>
+        <el-button type="primary" @click="submitForm">登录</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
+
 
 <script>
 import {ElMessageBox} from "element-plus";
@@ -87,5 +88,8 @@ export default {
 .login-container {
   width: 400px;
   margin: 50px auto;
+}
+.input-length {
+  width: 400px;
 }
 </style>

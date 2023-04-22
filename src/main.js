@@ -3,6 +3,7 @@ import App from "@/App.vue";
 import vuex from "@/vuex";
 import router from "@/router/route";
 import ElementPlus from 'element-plus';
+import '@/styles/index.css';
 import http from "@/utils/http";
 const app = createApp(App)
 app.use(router)
