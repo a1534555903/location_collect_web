@@ -1,5 +1,5 @@
 <template>
-  <div class="reset-password">
+  <div>
     <el-form :model="form" :rules="rules" ref="form" label-width="80px" class="reset-password-form">
       <el-form-item label="原密码" prop="oldPassword">
         <el-input type="password" v-model="form.oldPassword" autocomplete="off"></el-input>
@@ -90,10 +90,6 @@ export default {
 </script>
 
 <style scoped>
-.reset-password {
-  background-color: #f0f2f5;
-  padding: 20px;
-}
 
 .reset-password-form {
   max-width: 400px;

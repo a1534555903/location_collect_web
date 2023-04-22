@@ -20,6 +20,8 @@ export default {
 <style scoped>
 .myClass {
   display: flex;
+  background-color: #e1e4e8;
+  padding: 0 !important;
 }
 .myText {
   flex-grow: 1;

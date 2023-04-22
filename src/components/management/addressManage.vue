@@ -12,6 +12,7 @@
       </el-form-item>
     </el-form>
     <el-button type="primary" @click="handleSearch">搜索</el-button>
+    <el-button type="primary" @click="handleReset">重置</el-button>
     <el-table :data="tableData" v-loading="loading" style="margin-top: 10px;" @selection-change="handleSelectionChange">
       <el-table-column type="selection"></el-table-column>
       <el-table-column label="标准地址">
@@ -41,10 +42,10 @@
     <el-dialog v-model="dialogVisible" :title="title" :close-on-click-modal="false" :before-close="handleCloseDialog">
       <el-form ref="editForm" :model="editForm" :rules="rulesEdit" label-width="80px">
         <el-form-item label="路" prop="road">
-          <el-input v-model="editForm.streetCode"></el-input>
+          <el-input v-model="editForm.road"></el-input>
         </el-form-item>
         <el-form-item label="号" prop="door">
-          <el-input v-model="editForm.districtName"></el-input>
+          <el-input v-model="editForm.door"></el-input>
         </el-form-item>
         <el-form-item label="街道名" prop="streetName">
           <el-input v-model="editForm.streetName"></el-input>
@@ -65,20 +66,30 @@
       <el-table :data="poiData" v-loading="loading" style="margin-top: 10px;">
         <el-table-column label="兴趣点名" prop="poiName"></el-table-column>
         <el-table-column label="兴趣点类别" prop="typeNames"></el-table-column>
+        <el-table-column label="操作" width="300px" v-if="multipleSelection.length === 0">
+          <template #default="{ row }">
+            <el-button type="primary" @click="handleEditPOI(row)">编辑</el-button>
+            <el-button type="danger" @click="handleDeletePOI(row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <el-button type="primary" @click="handleAddPOI">添加兴趣点</el-button>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisiblePOI = false">取消</el-button>
       </span>
     </el-dialog>
-    <el-dialog v-model="dialogVisibleAddPOI" title="添加兴趣点" :close-on-click-modal="false"
+    <el-dialog v-model="dialogVisibleAddPOI" :title="addPOIForm.poiTitle" :close-on-click-modal="false"
       :before-close="handleCloseDialog">
       <el-form ref="addPOIForm" :model="addPOIForm" :rules="rulesAddPOI" label-width="80px">
         <el-form-item label="兴趣点名" prop="poiName">
           <el-input v-model="addPOIForm.poiName"></el-input>
         </el-form-item>
-        <el-form-item label="兴趣点类别" prop="typeNames">
-          <el-input v-model="addPOIForm.typeNames"></el-input>
+        <el-form-item label="类别" prop="typeNames">
+          <el-checkbox-group v-model="addPOIForm.typeIds">
+            <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId" ref="typeCheckbox">
+              {{ item.typeName }}
+            </el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -118,8 +129,10 @@ export default {
       dialogVisibleAddPOI: false,
       addPOIForm: {
         poiName: '',
-        typeNames: '',
-        addressId: ''
+        typeNames: [],
+        addressId: '',
+        poiTitle: '',
+        poiId: ''
       },
       searchForm: { // 搜索表单数据
         address: '',
@@ -144,10 +157,16 @@ export default {
           { required: true, message: '请输入纬度', trigger: 'blur' }
         ]
       },
+      rulesAddPOI: {
+        poiName: [
+          { required: true, message: '请输入兴趣点名', trigger: 'blur' }
+        ],
+      },
       multipleSelection: [] // 多选数据
     }
   },
   methods: {
+
     handleSelectionChange(selection) {
       this.multipleSelection = selection;
       console.log(selection)
@@ -160,8 +179,8 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true
-      this.$axios.get(this.$store.state.url + '/web/poi/getApproved?page=' + this.currentPage + '&size=' + this.pageSize
-      ).then(resp => {
+      this.$axios.get(this.$store.state.url + '/web/address/getApproved?page=' + this.currentPage + '&size=' + this.pageSize
+      ,{}).then(resp => {
         console.log(resp)
         this.tableData = resp.data.list
         this.total = this.tableData.length
@@ -189,13 +208,13 @@ export default {
     },
     // 处理删除
     handleDelete(row) {
-      const id = row.typeId
+      const id = row.addressId
       this.$confirm('确认删除该记录吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$axios.post(this.$store.state.url + '/web/type/deleteSingle', {
+        this.$axios.post(this.$store.state.url + '/web/address/rejectSingle', {
           id: id
         }).then(() => {
           this.$message({
@@ -226,8 +245,8 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        const ids = this.multipleSelection.map(item => item.typeId)
-        this.$axios.post(this.$store.state.url + '/web/type/deleteMulti', {
+        const ids = this.multipleSelection.map(item => item.addressId)
+        this.$axios.post(this.$store.state.url + '/web/address/rejectMulti', {
           ids: ids
         }).then(() => {
           this.$message({
@@ -247,11 +266,30 @@ export default {
     // 处理搜索
     handleSearch() {
       this.currentPage = 1
-      this.loadData()
+      this.loading = true
+      this.$axios.post(this.$store.state.url + '/web/address/searchApproved'
+          ,{
+            address: this.searchForm.address,
+            street: this.searchForm.streetName,
+            district: this.searchForm.districtName,
+            page: this.currentPage,
+            size: this.pageSize
+          }).then(resp => {
+        console.log(resp)
+        this.tableData = resp.data.list
+        this.total = this.tableData.length
+      }).catch(err => {
+        console.error(err)
+        ElMessage.error('加载数据失败')
+      }).finally(() => {
+        this.loading = false
+      })
     },
     // 处理重置
     handleReset() {
-      this.searchForm.keyword = ''
+      this.searchForm.address = ''
+      this.searchForm.streetName = ''
+      this.searchForm.districtName = ''
       this.loadData()
     },
     // 处理添加
@@ -282,8 +320,12 @@ export default {
       this.$refs.editForm.validate((valid) => {
         if (this.editForm.title === '添加记录') {
           // 添加记录
-          this.$axios.post(this.$store.state.url + '/web/type/add', {
-            typeName: this.editForm.category
+          this.$axios.post(this.$store.state.url + '/web/address/add', {
+            road: this.editForm.road,
+            door: this.editForm.door,
+            streetName: this.editForm.streetName,
+            longitude: this.editForm.longitude,
+            latitude: this.editForm.latitude
           }).then(() => {
             this.$message({
               type: 'success',
@@ -297,9 +339,13 @@ export default {
           })
         } else {
           // 修改记录
-          this.$axios.post(this.$store.state.url + '/web/type/update', {
-            typeName: this.editForm.category,
-            id: this.editForm.id
+          this.$axios.post(this.$store.state.url + '/web/address/edit', {
+            addressId: this.editForm.addressId,
+            road: this.editForm.road,
+            door: this.editForm.door,
+            streetName: this.editForm.streetName,
+            longitude: this.editForm.longitude,
+            latitude: this.editForm.latitude
           }).then(() => {
             this.$message({
               type: 'success',
@@ -317,8 +363,61 @@ export default {
     handleAddPOI() {
       this.dialogVisibleAddPOI = true
       this.addPOIForm.poiName=''
-      this.addPOIForm.typeNames=''
+      this.addPOIForm.typeIds=[]
+      this.addPOIForm.poiTitle='添加兴趣点'
       this.addPOIForm.addressId=this.editForm.addressId
+      this.loadTypes()
+    },
+    handleDeletePOI(row){
+      const id = row.poiId
+      this.$confirm('确认删除该记录吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios.post(this.$store.state.url + '/web/poi/rejectSingle', {
+          id: id
+        }).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+// 删除成功后重新加载数据
+          this.loadPOI(this.editForm.addressId)
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    handleEditPOI(row){
+      this.dialogVisibleAddPOI = true
+      this.addPOIForm.poiTitle = '编辑兴趣点'
+      this.addPOIForm.poiName = row.poiName
+      this.addPOIForm.poiId = row.poiId
+      let typeNames = []
+      if(row.typeNames !== null){
+        //typeNames是一个字符串,按','分割成数组
+        typeNames = row.typeNames.split(',')
+      }
+      //遍历typeNames数组,将每个typeName转换成typeId,对应关系在typeList中
+      let typeIds = []
+      for (let i = 0; i < typeNames.length; i++) {
+        for (let j = 0; j < this.typeList.length; j++) {
+          if (typeNames[i] === this.typeList[j].typeName) {
+            typeIds.push(this.typeList[j].typeId)
+          }
+        }
+      }
+      this.addPOIForm.typeIds = typeIds
+      this.addPOIForm.addressId = this.editForm.addressId
+      this.loadTypes()
+      //设置ref=typeCheckbox中label在typeIds中的checkbox为选中状态
+      this.$nextTick(() => {
+        this.$refs.typeCheckbox.setCheckedNodes(typeIds)
+      })
     },
     findPoi(row){
       this.dialogVisiblePOI=true
@@ -338,9 +437,10 @@ export default {
     handleSaveAddPOI(){
       this.$refs.addPOIForm.validate((valid) => {
           // 添加记录
-          this.$axios.post(this.$store.state.url + '/web/poi/add', {
+        if(this.addPOIForm.poiTitle==='添加兴趣点'){
+          this.$axios.post(this.$store.state.url + '/web/poi/addById', {
             poiName: this.addPOIForm.poiName,
-            typeNames: this.addPOIForm.typeNames,
+            typeIds: this.addPOIForm.typeIds,
             addressId: this.addPOIForm.addressId
           }).then(() => {
             this.$message({
@@ -353,10 +453,29 @@ export default {
           }).catch(err => {
             ElMessage.error('添加失败,请检查添加的内容是否正确')
           })
+        }
+        else{
+          this.$axios.post(this.$store.state.url + '/web/poi/updateSingle', {
+            poiId: this.addPOIForm.poiId,
+            poiName: this.addPOIForm.poiName,
+            typeIds: this.addPOIForm.typeIds,
+          }).then(() => {
+            this.$message({
+              type: 'success',
+              message: '修改成功!'
+            })
+            // 修改成功后关闭对话框，重新加载数据
+            this.dialogVisibleAddPOI = false
+            this.loadPOI(this.addPOIForm.addressId)
+          }).catch(err => {
+            ElMessage.error('修改失败,请检查修改的内容是否正确')
+          })
+        }
+
       })
     },
     loadPOI(addressId){
-        this.$axios.get(this.$store.state.url + '/web/poi/findPoiByAddressId', {
+        this.$axios.post(this.$store.state.url + '/web/address/findPoiByAddressId', {
           addressId: addressId
         }).then((res) => {
           this.poiData=res.data
@@ -367,6 +486,7 @@ export default {
   },
   mounted() {
     this.loadData()
+    this.loadTypes()
   }
 }
 </script>

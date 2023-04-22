@@ -56,7 +56,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="handleEditSave">确定</el-button>
         <el-button @click="dialogVisible = false">取消</el-button>
-  </span>
+      </span>
     </el-dialog>
     <el-button type="primary" @click="handleAdd">添加</el-button>
     <el-dialog v-model="addDialogVisible" title="添加" :close-on-click-modal="false" :before-close="handleCloseDialog">
@@ -75,7 +75,7 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取消</el-button>
+    <el-button @click="addDialogVisible = false">取消</el-button>
     <el-button type="primary" @click="handleAddSave">确定</el-button>
   </span>
     </el-dialog>
