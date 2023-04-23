@@ -53,14 +53,14 @@
       <el-button type="primary" @click="handleSave">确定</el-button>
     </span>
       </el-dialog>
-  
+    <FileUploader :selection="multipleSelection" :title="'street'"></FileUploader>
     </div>
   </template>
   
   <script>
   import {ref} from 'vue'
   import {ElMessage, ElMessageBox, ElLoading} from 'element-plus'
-  
+  import FileUploader from "@/components/common/FileUploader.vue";
   export default {
     name: 'streetManage',
     data() {
@@ -98,7 +98,11 @@
         multipleSelection: [] // 多选数据
       }
     },
+    components: {
+      FileUploader
+    },
     methods: {
+
       handleSelectionChange(selection) {
         this.multipleSelection = selection;
         console.log(selection)

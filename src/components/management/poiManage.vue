@@ -1,13 +1,13 @@
 <template>
   <div>
     <el-form ref="searchForm" :model="searchForm" label-width="80px">
-      <el-form-item label="兴趣点名" prop="poiName">
+      <el-form-item label="兴趣点名:" prop="poiName">
         <el-input v-model="searchForm.poiName" style="width: 300px"></el-input>
       </el-form-item>
-      <el-form-item label="标准地址" prop="address">
+      <el-form-item label="标准地址:" prop="address">
         <el-input v-model="searchForm.address" style="width: 300px"></el-input>
       </el-form-item>
-      <el-form-item label="类别" prop="category">
+      <el-form-item label="类别:" prop="category">
         <el-checkbox-group v-model="searchForm.typeNames">
           <el-checkbox v-for="item in typeList" :label="item.typeId" :key="item.typeId">{{ item.typeName }}
           </el-checkbox>

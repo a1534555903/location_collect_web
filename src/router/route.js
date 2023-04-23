@@ -45,6 +45,11 @@ const route = [
         component: () => import('@/components/management/streetManage.vue'),
         meta: { requiresAuth: true },
     },
+    {
+        path: '/search/address',
+        component: () => import('@/components/search/searchAddress.vue'),
+        meta: { requiresAuth: true },
+    }
 ]
 const router = VueRouter.createRouter({
     history: VueRouter.createWebHashHistory(),
