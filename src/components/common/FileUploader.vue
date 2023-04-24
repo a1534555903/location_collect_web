@@ -78,10 +78,6 @@ export default {
         title: this.title
       });
       console.log(data)
-      //data是utf-8编码的csv格式的字符串,转化成gbk编码的csv格式的字符串
-      // let gbkdecoder=new TextDecoder('gbk')
-      // let gbkData=gbkdecoder.decode(new TextEncoder().encode(data))
-      // console.log(gbkData)
       const blob = new Blob([data], {type: 'text/csv;charset=utf-8'})
       const fileName = "example" + '.csv'
       const link = document.createElement('a')
