@@ -53,7 +53,7 @@
       <el-button type="primary" @click="handleSave">确定</el-button>
     </span>
       </el-dialog>
-    <FileUploader :selection="multipleSelection" :title="'street'"></FileUploader>
+    <FileUploader :selection="multipleSelection" :title="'街道信息'" :load="loadData"></FileUploader>
     </div>
   </template>
   
