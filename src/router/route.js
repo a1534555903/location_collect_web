@@ -7,7 +7,7 @@ const route = [
     },
     {
         path: '/index',
-        component: () => import('@/components/common/index.vue'),
+        component: () => import('@/components/index/index.vue'),
         meta: { requiresAuth: true },
     },
     {
@@ -49,7 +49,7 @@ const route = [
         path: '/search/address',
         component: () => import('@/components/search/searchAddress.vue'),
         meta: { requiresAuth: true },
-    }
+    },
 ]
 const router = VueRouter.createRouter({
     history: VueRouter.createWebHashHistory(),
