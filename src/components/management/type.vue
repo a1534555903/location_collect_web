@@ -37,15 +37,19 @@
         <el-button type="primary" @click="handleSave">确 定</el-button>
       </span>
     </el-dialog>
+    <FileUploader :selection="multipleSelection" :title="'兴趣点类别信息'" :load="loadData"></FileUploader>
   </div>
 </template>
 
 <script>
 import {ref} from 'vue'
 import {ElMessage, ElMessageBox, ElLoading} from 'element-plus'
-
+import FileUploader from "@/components/common/FileUploader.vue";
 export default {
   name: 'type',
+  components: {
+    FileUploader
+  },
   data() {
     return {
       tableData: [], // 列表数据

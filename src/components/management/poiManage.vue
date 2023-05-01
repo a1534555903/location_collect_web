@@ -79,14 +79,20 @@
     <el-button type="primary" @click="handleAddSave">确定</el-button>
   </span>
     </el-dialog>
+    <FileUploader :selection="multipleSelection" :title="'兴趣点信息'" :load="loadData"></FileUploader>
+
   </div>
 </template>
 
 <script>
 import {ElMessage} from 'element-plus'
+import FileUploader from "@/components/common/FileUploader.vue";
 
 export default {
   name: 'poiManage',
+  components: {
+    FileUploader
+  },
   data() {
     return {
       tableData: [], // 列表数据

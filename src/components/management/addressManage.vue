@@ -97,15 +97,20 @@
         <el-button type="primary" @click="handleSaveAddPOI">确定</el-button>
       </span>
     </el-dialog>
+    <FileUploader :selection="multipleSelection" :title="'标准地址信息'" :load="loadData"></FileUploader>
   </div>
 </template>
   
 <script>
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
+import FileUploader from "@/components/common/FileUploader.vue";
 
 export default {
   name: 'addressManage',
+  components: {
+    FileUploader
+  },
   data() {
     return {
       tableData: [], // 列表数据
