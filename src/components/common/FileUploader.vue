@@ -73,6 +73,15 @@ export default {
       if(this.title=== '街道信息'){
         ids=this.selection.map(item => item.streetCode)
       }
+      else if (this.title==='标准地址信息'){
+        ids=this.selection.map(item => item.addressId)
+      }
+      else if(this.title==='兴趣点信息'){
+        ids=this.selection.map(item => item.poiId)
+      }
+      else if(this.title==='兴趣点类别信息'){
+        ids=this.selection.map(item => item.typeId)
+      }
       const {data} = await this.$axios.post(this.downloadUrl, {
         ids: ids,
         title: this.title
